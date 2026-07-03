@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text.Json;
 using Railway.EventConsumer.Domain.Enums;
 using Railway.EventConsumer.Application.Messaging;
+using Microsoft.Extensions.Logging;
 
 namespace Railway.EventConsumer.Application.Handlers
 {
@@ -14,10 +15,12 @@ namespace Railway.EventConsumer.Application.Handlers
         public string MessageType => "SendEmail";
 
         private readonly IConfiguration _config;
+        private readonly ILogger<EmailMessageHandler> _logger;
 
-        public EmailMessageHandler(IConfiguration config)
+        public EmailMessageHandler(IConfiguration config, ILogger<EmailMessageHandler> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public async Task<HandlerResult> HandleAsync(JsonElement data, int retryCount)
@@ -26,7 +29,10 @@ namespace Railway.EventConsumer.Application.Handlers
             {
                 var message = JsonSerializer.Deserialize<EmailMessaje>(data.GetRawText());
                 if (message == null)
+                {
+                    _logger.LogError(Errors.InvalidMessage.Description);
                     return new HandlerResult { Status = HandlerResultStatus.Discard, ErrorMessage = Errors.InvalidMessage.Description };
+                }
 
                 var host = _config["SMTP:HOST"];
                 var port = int.Parse(_config["SMTP:PORT"]!);
@@ -51,6 +57,8 @@ namespace Railway.EventConsumer.Application.Handlers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error sending email: {Message}", ex.Message);
+
                 if (retryCount < 1)
                     return new HandlerResult { Status = HandlerResultStatus.Retry, ErrorMessage = ex.Message };
 
