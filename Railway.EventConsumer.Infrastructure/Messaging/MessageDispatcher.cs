@@ -1,4 +1,4 @@
-﻿using Railway.EventConsumer.Application.Handlers;
+﻿using Railway.EventConsumer.Application.Messaging;
 using System.Text.Json;
 
 namespace Railway.EventConsumer.Infrastructure.Messaging
@@ -12,7 +12,7 @@ namespace Railway.EventConsumer.Infrastructure.Messaging
             _handlers = handlers.ToDictionary(h => h.MessageType);
         }
 
-        public async Task DispatchAsync(string json)
+        public async Task<HandlerResult> DispatchAsync(string json, int retryCount)
         {
             var doc = JsonDocument.Parse(json);
             var type = doc.RootElement.GetProperty("type").GetString();
@@ -21,7 +21,7 @@ namespace Railway.EventConsumer.Infrastructure.Messaging
             if (!_handlers.TryGetValue(type!, out var handler))
                 throw new Exception($"No handler found for message type {type}");
 
-            await handler.HandleAsync(data);
+            return await handler.HandleAsync(data, retryCount);
         }
     }
 
