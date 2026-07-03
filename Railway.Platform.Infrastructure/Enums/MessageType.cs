@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Railway.EventConsumer.Infrastructure.Enums
+namespace Railway.Platform.Infrastructure.Enums
 {
     public enum MessageType
     {

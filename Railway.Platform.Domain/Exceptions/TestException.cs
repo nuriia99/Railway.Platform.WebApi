@@ -1,4 +1,4 @@
-﻿namespace Railway.EventConsumer.Domain.Exceptions
+﻿namespace Railway.Platform.Domain.Exceptions
 {
     public class TestException(string message) : Exception(message)
     {

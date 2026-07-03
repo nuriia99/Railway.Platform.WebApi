@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Railway.EventConsumer.Domain\Railway.EventConsumer.Domain.csproj" />
-	<ProjectReference Include="..\Railway.EventConsumer.Application\Railway.EventConsumer.Application.csproj" />
-    <ProjectReference Include="..\Railway.EventConsumer.Infrastructure\Railway.EventConsumer.Infrastructure.csproj" />
+    <ProjectReference Include="..\Railway.Platform.Domain\Railway.Platform.Domain.csproj" />
+	<ProjectReference Include="..\Railway.Platform.Application\Railway.Platform.Application.csproj" />
+    <ProjectReference Include="..\Railway.Platform.Infrastructure\Railway.Platform.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

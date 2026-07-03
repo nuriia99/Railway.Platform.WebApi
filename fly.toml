@@ -1,9 +1,9 @@
 # fly.toml moved to repository root. Build uses the Dockerfile in the WebApi project folder.
-app = "railway-eventconsumer-webapi"
+app = "railway-platform-webapi"
 primary_region = 'cdg'
 
 [build]
-  dockerfile = "Railway.EventConsumer.WebApi/Dockerfile"
+  dockerfile = "Railway.Platform.WebApi/Dockerfile"
 
 [http_service]
   internal_port = 8080

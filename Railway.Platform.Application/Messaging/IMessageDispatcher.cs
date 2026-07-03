@@ -1,6 +1,6 @@
-﻿using Railway.EventConsumer.CrossCutting.HandleErrors;
+﻿using Railway.Platform.CrossCutting.HandleErrors;
 
-namespace Railway.EventConsumer.Application.Messaging
+namespace Railway.Platform.Application.Messaging
 {
     public interface IMessageDispatcher
     {

@@ -1,5 +1,5 @@
 # fly.toml app configuration file
-app = 'railway-eventconsumer-webapi-preproduction'
+app = 'railway-platform-webapi-preproduction'
 primary_region = 'cdg'
 
 [build]

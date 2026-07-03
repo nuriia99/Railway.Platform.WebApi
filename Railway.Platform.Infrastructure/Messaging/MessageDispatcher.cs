@@ -1,7 +1,7 @@
-﻿using Railway.EventConsumer.Application.Messaging;
+﻿using Railway.Platform.Application.Messaging;
 using System.Text.Json;
 
-namespace Railway.EventConsumer.Infrastructure.Messaging
+namespace Railway.Platform.Infrastructure.Messaging
 {
     public class MessageDispatcher : IMessageDispatcher
     {

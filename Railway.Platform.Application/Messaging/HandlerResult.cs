@@ -1,6 +1,6 @@
-﻿using Railway.EventConsumer.Domain.Enums;
+﻿using Railway.Platform.Domain.Enums;
 
-namespace Railway.EventConsumer.Application.Messaging
+namespace Railway.Platform.Application.Messaging
 {
     public class HandlerResult
     {
