@@ -1,4 +1,6 @@
-﻿using Railway.EventConsumer.Domain.Events;
+﻿using Railway.EventConsumer.Application.Messaging;
+using Railway.EventConsumer.Domain.Enums;
+using Railway.EventConsumer.Domain.Events;
 using Railway.EventConsumer.Domain.Exceptions;
 using System.Text.Json;
 
@@ -8,7 +10,7 @@ namespace Railway.EventConsumer.Application.Handlers
     {
         public string MessageType => "MessageTest";
 
-        public Task HandleAsync(JsonElement data)
+        public Task<HandlerResult> HandleAsync(JsonElement data, int retryCount)
         {
             var message = JsonSerializer.Deserialize<MessageTest>(data.GetRawText());
             if (message != null)
@@ -20,7 +22,7 @@ namespace Railway.EventConsumer.Application.Handlers
                     throw new TestException("Test retry policy");
                 }
             }
-            return Task.CompletedTask;
+            return Task.FromResult(new HandlerResult { Status = HandlerResultStatus.Success });
         }
     }
 }

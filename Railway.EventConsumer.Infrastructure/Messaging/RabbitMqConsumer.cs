@@ -3,10 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Railway.EventConsumer.Application.Handlers;
-using Railway.EventConsumer.Domain.Events;
+using Railway.EventConsumer.Application.Messaging;
+using Railway.EventConsumer.Domain.Enums;
 using System.Text;
-using System.Text.Json;
 
 namespace Railway.EventConsumer.Infrastructure.Messaging
 {
@@ -19,7 +18,8 @@ namespace Railway.EventConsumer.Infrastructure.Messaging
         private IConnection? _connection;
         private IModel? _channel;
 
-        public RabbitMqConsumer(IConfiguration config, 
+        public RabbitMqConsumer(
+            IConfiguration config,
             IMessageDispatcher messageDispatcher,
             ILogger<RabbitMqConsumer> logger)
         {
@@ -45,53 +45,73 @@ namespace Railway.EventConsumer.Infrastructure.Messaging
                 {
                     var json = Encoding.UTF8.GetString(args.Body.ToArray());
 
-                    await _messageDispatcher.DispatchAsync(json);
+                    var headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
+                    int retryCount = headers.ContainsKey("x-retry-count")
+                        ? Convert.ToInt32(headers["x-retry-count"])
+                        : 0;
 
-                    _channel.BasicAck(args.DeliveryTag, false);
+                    var result = await _messageDispatcher.DispatchAsync(json, retryCount);
+
+                    HandleResult(args, _channel, result, retryCount);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing message");
-                    HandleRetries(args, _channel);
+                    _logger.LogError(ex, "Unexpected error processing message");
+                    _channel.BasicNack(args.DeliveryTag, false, false);
                 }
             };
 
             _channel.BasicConsume(queueName, false, consumer);
-            _logger.LogInformation($"Consumer is listening...");
+            _logger.LogInformation("Consumer is listening...");
 
             await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
-        private void HandleRetries(BasicDeliverEventArgs args, IModel channel)
+        private void HandleResult(
+            BasicDeliverEventArgs args,
+            IModel channel,
+            HandlerResult result,
+            int retryCount)
         {
-            var headers = args.BasicProperties.Headers != null
-                                    ? new Dictionary<string, object>(args.BasicProperties.Headers)
-                                    : new Dictionary<string, object>();
-
-            int retryCount = headers.ContainsKey("x-retry-count")
-                ? Convert.ToInt32(headers["x-retry-count"])
-                : 0;
-
-            if (retryCount < 3)
+            switch (result.Status)
             {
-                var props = channel.CreateBasicProperties();
-                props.Headers = headers;
-                props.Headers["x-retry-count"] = retryCount + 1;
+                case HandlerResultStatus.Success:
+                    channel.BasicAck(args.DeliveryTag, false);
+                    return;
 
-                channel.BasicPublish(
-                    exchange: "retry-exchange",
-                    routingKey: "retry",
-                    basicProperties: props,
-                    body: args.Body);
+                case HandlerResultStatus.Retry:
+                    RetryMessage(args, channel, retryCount);
+                    return;
 
-                channel.BasicAck(args.DeliveryTag, false);
-                _logger.LogWarning($"Message send to retry: {retryCount + 1}/3");
+                case HandlerResultStatus.Discard:
+                    channel.BasicNack(args.DeliveryTag, false, false);
+                    _logger.LogError("Message discarded by handler decision");
+                    return;
             }
-            else
+        }
+
+        private void RetryMessage(BasicDeliverEventArgs args, IModel channel, int retryCount)
+        {
+            if (retryCount >= 3)
             {
                 channel.BasicNack(args.DeliveryTag, false, false);
-                _logger.LogError("Message discard after 3 retries");
+                _logger.LogError("Message discarded after 3 retries");
+                return;
             }
+
+            var props = channel.CreateBasicProperties();
+            props.Headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
+            props.Headers["x-retry-count"] = retryCount + 1;
+
+            channel.BasicPublish(
+                exchange: "retry-exchange",
+                routingKey: "retry",
+                basicProperties: props,
+                body: args.Body);
+
+            channel.BasicAck(args.DeliveryTag, false);
+
+            _logger.LogWarning($"Message sent to retry: {retryCount + 1}");
         }
     }
 }
