@@ -1,4 +1,4 @@
-﻿namespace Railway.EventConsumer.CrossCutting.HandleErrors
+﻿namespace Railway.Platform.CrossCutting.HandleErrors
 {
     public class OperationResult<T>
     {

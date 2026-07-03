@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Railway.EventConsumer.CrossCutting\Railway.EventConsumer.CrossCutting.csproj" />
-    <ProjectReference Include="..\Railway.EventConsumer.Domain\Railway.EventConsumer.Domain.csproj" />
+    <ProjectReference Include="..\Railway.Platform.CrossCutting\Railway.Platform.CrossCutting.csproj" />
+    <ProjectReference Include="..\Railway.Platform.Domain\Railway.Platform.Domain.csproj" />
   </ItemGroup>
 </Project>

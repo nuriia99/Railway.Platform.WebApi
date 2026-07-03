@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Railway.EventConsumer.CrossCutting.HandleErrors
+namespace Railway.Platform.CrossCutting.HandleErrors
 {
     public sealed record Error(HttpStatusCode Code, string Description) { }
 }

@@ -1,5 +1,5 @@
-using Railway.EventConsumer.Application.Configuration;
-using Railway.EventConsumer.Infrastructure.Configuration;
+using Railway.Platform.Application.Configuration;
+using Railway.Platform.Infrastructure.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -1,4 +1,4 @@
-# Railway.EventConsumer.Worker
+# Railway.Platform.Worker
 
 A background worker application that consumes and processes messages from RabbitMQ using .NET 10 and asynchronous message handling patterns.
 
@@ -8,12 +8,12 @@ This worker application listens to a RabbitMQ queue, consumes incoming messages,
 
 ## Project Structure
 
-- **Railway.EventConsumer.WebApi**: Entry point and host application (Program.cs). Sets up dependency injection and starts background services.
-- **Railway.EventConsumer.Application**: Core business logic including message handlers and handler interfaces.
-- **Railway.EventConsumer.Infrastructure**: External integrations (RabbitMQ consumer, message dispatcher).
-- **Railway.EventConsumer.Domain**: Domain models and events (MessageTest, etc.).
-- **Railway.EventConsumer.CrossCutting**: Shared utilities and helpers.
-- **Railway.EventConsumer.UnitTests**: Unit tests using xUnit.
+- **Railway.Platform.WebApi**: Entry point and host application (Program.cs). Sets up dependency injection and starts background services.
+- **Railway.Platform.Application**: Core business logic including message handlers and handler interfaces.
+- **Railway.Platform.Infrastructure**: External integrations (RabbitMQ consumer, message dispatcher).
+- **Railway.Platform.Domain**: Domain models and events (MessageTest, etc.).
+- **Railway.Platform.CrossCutting**: Shared utilities and helpers.
+- **Railway.Platform.UnitTests**: Unit tests using xUnit.
 
 ## Current Functionality
 
@@ -53,6 +53,6 @@ This application uses the **Strategy Pattern** to handle different message types
 Quick start
 1. Restore packages: `dotnet restore`
 2. Build: `dotnet build`
-3. Run the API: `dotnet run --project Railway.EventConsumer.WebApi`
+3. Run the API: `dotnet run --project Railway.Platform.WebApi`
 
 After the API is running you can open the Scalar UI (OpenAPI viewer) at: `https://localhost:{port}/scalar` (or the path configured by MapScalarApiReference; check console output for the actual port).

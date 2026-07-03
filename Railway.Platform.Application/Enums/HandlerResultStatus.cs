@@ -1,4 +1,4 @@
-﻿namespace Railway.EventConsumer.Domain.Enums
+﻿namespace Railway.Platform.Domain.Enums
 {
     public enum HandlerResultStatus
     {

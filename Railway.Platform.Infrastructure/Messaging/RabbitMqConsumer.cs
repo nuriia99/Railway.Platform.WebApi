@@ -3,11 +3,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Railway.EventConsumer.Application.Messaging;
-using Railway.EventConsumer.Domain.Enums;
+using Railway.Platform.Application.Messaging;
+using Railway.Platform.Domain.Enums;
 using System.Text;
 
-namespace Railway.EventConsumer.Infrastructure.Messaging
+namespace Railway.Platform.Infrastructure.Messaging
 {
     public class RabbitMqConsumer : BackgroundService
     {

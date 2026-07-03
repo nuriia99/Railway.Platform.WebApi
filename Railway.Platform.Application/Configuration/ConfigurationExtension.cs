@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Railway.EventConsumer.Application.Handlers;
-using Railway.EventConsumer.Application.Messaging;
+using Railway.Platform.Application.Handlers;
+using Railway.Platform.Application.Messaging;
 
-namespace Railway.EventConsumer.Application.Configuration
+namespace Railway.Platform.Application.Configuration
 {
     public static class ConfigurationExtension
     {

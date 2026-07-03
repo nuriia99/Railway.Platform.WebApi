@@ -1,4 +1,4 @@
-﻿namespace Railway.EventConsumer.UnitTests
+﻿namespace Railway.Platform.UnitTests
 {
     public class UnitTest1
     {

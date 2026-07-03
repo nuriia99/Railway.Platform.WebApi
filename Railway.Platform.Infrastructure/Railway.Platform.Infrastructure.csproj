@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Railway.EventConsumer.Application\Railway.EventConsumer.Application.csproj" />
+    <ProjectReference Include="..\Railway.Platform.Application\Railway.Platform.Application.csproj" />
   </ItemGroup>
 
 </Project>

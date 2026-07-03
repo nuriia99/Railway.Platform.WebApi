@@ -1,14 +1,14 @@
-﻿using Railway.EventConsumer.CrossCutting.HandleErrors;
-using Railway.EventConsumer.Domain.Events;
+﻿using Railway.Platform.CrossCutting.HandleErrors;
+using Railway.Platform.Domain.Events;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Mail;
 using System.Text.Json;
-using Railway.EventConsumer.Domain.Enums;
-using Railway.EventConsumer.Application.Messaging;
+using Railway.Platform.Domain.Enums;
+using Railway.Platform.Application.Messaging;
 using Microsoft.Extensions.Logging;
 
-namespace Railway.EventConsumer.Application.Handlers
+namespace Railway.Platform.Application.Handlers
 {
     public class EmailMessageHandler : IMessageHandler
     {

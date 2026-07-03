@@ -1,8 +1,8 @@
-﻿using Railway.EventConsumer.CrossCutting.HandleErrors;
-using Railway.EventConsumer.Domain.Enums;
+﻿using Railway.Platform.CrossCutting.HandleErrors;
+using Railway.Platform.Domain.Enums;
 using System.Text.Json;
 
-namespace Railway.EventConsumer.Application.Messaging
+namespace Railway.Platform.Application.Messaging
 {
     public interface IMessageHandler
     {

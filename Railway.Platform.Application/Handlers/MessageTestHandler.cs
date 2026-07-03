@@ -1,10 +1,10 @@
-﻿using Railway.EventConsumer.Application.Messaging;
-using Railway.EventConsumer.Domain.Enums;
-using Railway.EventConsumer.Domain.Events;
-using Railway.EventConsumer.Domain.Exceptions;
+﻿using Railway.Platform.Application.Messaging;
+using Railway.Platform.Domain.Enums;
+using Railway.Platform.Domain.Events;
+using Railway.Platform.Domain.Exceptions;
 using System.Text.Json;
 
-namespace Railway.EventConsumer.Application.Handlers
+namespace Railway.Platform.Application.Handlers
 {
     public class MessageTestHandler : IMessageHandler
     {

@@ -1,4 +1,4 @@
-﻿namespace Railway.EventConsumer.Domain.Events
+﻿namespace Railway.Platform.Domain.Events
 {
     public record MessageTest
     {
