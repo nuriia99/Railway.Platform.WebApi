@@ -1,9 +1,13 @@
-# fly.toml moved to repository root. Build uses the Dockerfile in the WebApi project folder.
-app = "railway-platform-webapi"
-primary_region = 'cdg'
+# fly.toml app configuration file generated for railway-platform-webapi on 2026-07-03T17:25:49Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'railway-platform-webapi'
+primary_region = 'ams'
 
 [build]
-  dockerfile = "Railway.Platform.WebApi/Dockerfile"
+  dockerfile = 'Railway.Platform.WebApi/Dockerfile'
 
 [http_service]
   internal_port = 8080
