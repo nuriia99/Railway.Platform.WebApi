@@ -1,0 +1,8 @@
+{
+  "type": "SendEmail",
+  "data": {
+    "to": "test@example.com",
+    "subject": "Test Subject",
+    "body": "Test Body"
+  }
+}
