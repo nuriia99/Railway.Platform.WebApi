@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -13,19 +14,19 @@ namespace Railway.Platform.Infrastructure.Messaging
     {
         private readonly IConfiguration _config;
         private readonly ILogger<RabbitMqConsumer> _logger;
-        private readonly IMessageDispatcher _messageDispatcher;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         private IConnection? _connection;
         private IModel? _channel;
 
         public RabbitMqConsumer(
             IConfiguration config,
-            IMessageDispatcher messageDispatcher,
+            IServiceScopeFactory scopeFactory,
             ILogger<RabbitMqConsumer> logger)
         {
             _config = config;
             _logger = logger;
-            _messageDispatcher = messageDispatcher;
+            _scopeFactory = scopeFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,7 +51,9 @@ namespace Railway.Platform.Infrastructure.Messaging
                         ? Convert.ToInt32(headers["x-retry-count"])
                         : 0;
 
-                    var result = await _messageDispatcher.DispatchAsync(json, retryCount);
+                    using var scope = _scopeFactory.CreateScope();
+                    var dispatcher = scope.ServiceProvider.GetRequiredService<IMessageDispatcher>();
+                    var result = await dispatcher.DispatchAsync(json, retryCount);
 
                     HandleResult(args, _channel, result, retryCount);
                 }

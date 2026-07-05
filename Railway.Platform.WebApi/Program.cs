@@ -1,10 +1,23 @@
 using Railway.Platform.Application.Configuration;
 using Railway.Platform.Infrastructure.Configuration;
+using Scalar.AspNetCore;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-var host = builder.Build();
-host.Run();
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapOpenApi();
+app.MapScalarApiReference();
+
+app.Run();
