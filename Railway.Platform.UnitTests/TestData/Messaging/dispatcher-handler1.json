@@ -1,0 +1,6 @@
+{
+  "type": "Handler1Type",
+  "data": {
+    "test": "value"
+  }
+}
