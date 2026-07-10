@@ -17,7 +17,7 @@ namespace Railway.Platform.Infrastructure.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
 
         private IConnection? _connection;
-        private IModel? _channel;
+        private IChannel? _channel;
 
         public RabbitMqConsumer(
             IConfiguration config,
@@ -29,90 +29,93 @@ namespace Railway.Platform.Infrastructure.Messaging
             _scopeFactory = scopeFactory;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             var connectionString = _config["RabbitMQ:ConnectionString"];
             var queueName = _config["RabbitMQ:QueueName"];
 
             var factory = new ConnectionFactory { Uri = new Uri(connectionString!) };
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            _connection = await factory.CreateConnectionAsync(cancellationToken);
+            _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-            var consumer = new EventingBasicConsumer(_channel);
+            var consumer = new AsyncEventingBasicConsumer(_channel);
 
-            consumer.Received += async (sender, args) =>
+            consumer.ReceivedAsync += async (sender, args) =>
             {
                 try
                 {
                     var json = Encoding.UTF8.GetString(args.Body.ToArray());
 
-                    var headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
-                    int retryCount = headers.ContainsKey("x-retry-count")
-                        ? Convert.ToInt32(headers["x-retry-count"])
+                    var headers = args.BasicProperties.Headers ?? new Dictionary<string, object?>();
+                    int retryCount = headers.TryGetValue("x-retry-count", out var val) && val is int intVal
+                        ? intVal
                         : 0;
 
                     using var scope = _scopeFactory.CreateScope();
                     var dispatcher = scope.ServiceProvider.GetRequiredService<IMessageDispatcher>();
                     var result = await dispatcher.DispatchAsync(json, retryCount);
 
-                    HandleResult(args, _channel, result, retryCount);
+                    await HandleResultAsync(args, _channel!, result, retryCount, cancellationToken);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error processing message");
-                    _channel.BasicNack(args.DeliveryTag, false, false);
+                    await _channel!.BasicNackAsync(args.DeliveryTag, false, false, cancellationToken);
                 }
             };
 
-            _channel.BasicConsume(queueName, false, consumer);
+            await _channel.BasicConsumeAsync(queueName!, false, consumer, cancellationToken: cancellationToken);
             _logger.LogInformation("Consumer is listening...");
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+            await Task.Delay(Timeout.Infinite, cancellationToken);
         }
 
-        private void HandleResult(
+        private async Task HandleResultAsync(
             BasicDeliverEventArgs args,
-            IModel channel,
+            IChannel channel,
             HandlerResult result,
-            int retryCount)
+            int retryCount,
+            CancellationToken stoppingToken)
         {
             switch (result.Status)
             {
                 case HandlerResultStatus.Success:
-                    channel.BasicAck(args.DeliveryTag, false);
+                    await channel.BasicAckAsync(args.DeliveryTag, false, stoppingToken);
                     return;
 
                 case HandlerResultStatus.Retry:
-                    RetryMessage(args, channel, retryCount);
+                    await RetryMessageAsync(args, channel, retryCount, stoppingToken);
                     return;
 
                 case HandlerResultStatus.Discard:
-                    channel.BasicNack(args.DeliveryTag, false, false);
+                    await channel.BasicNackAsync(args.DeliveryTag, false, false, stoppingToken);
                     _logger.LogError("Message discarded by handler decision");
                     return;
             }
         }
 
-        private void RetryMessage(BasicDeliverEventArgs args, IModel channel, int retryCount)
+        private async Task RetryMessageAsync(BasicDeliverEventArgs args, IChannel channel, int retryCount, CancellationToken stoppingToken)
         {
             if (retryCount >= 3)
             {
-                channel.BasicNack(args.DeliveryTag, false, false);
+                await channel.BasicNackAsync(args.DeliveryTag, false, false, stoppingToken);
                 _logger.LogError("Message discarded after 3 retries");
                 return;
             }
 
-            var props = channel.CreateBasicProperties();
-            props.Headers = args.BasicProperties.Headers ?? new Dictionary<string, object>();
+            var props = new BasicProperties();
+            props.Headers = args.BasicProperties.Headers ?? new Dictionary<string, object?>();
             props.Headers["x-retry-count"] = retryCount + 1;
 
-            channel.BasicPublish(
+            await channel.BasicPublishAsync(
                 exchange: "retry-exchange",
                 routingKey: "retry",
+                mandatory: false,
                 basicProperties: props,
-                body: args.Body);
+                body: args.Body,
+                cancellationToken: stoppingToken);
 
-            channel.BasicAck(args.DeliveryTag, false);
+            await channel.BasicAckAsync(args.DeliveryTag, false, stoppingToken);
 
             _logger.LogWarning($"Message sent to retry: {retryCount + 1}");
         }

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Railway.Platform.WebApi.Entities;
+using Railway.Platform.Application.Interfaces;
+using Railway.Platform.Domain.Entities;
+using Railway.Platform.WebApi.Mappers;
 using Railway.Platform.WebApi.Models;
 
 namespace Railway.Platform.WebApi.Controllers
@@ -10,19 +11,23 @@ namespace Railway.Platform.WebApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        [HttpPost("register")]
-        public ActionResult<User> Register(UserDto request)
+        private readonly IAuthService _authService;
+        public AuthController(IAuthService authService) 
         {
-            var user = new User()
-            {
-                Username = request.UserName
-            };
-
-            user.PasswordHash = new PasswordHasher<User>()
-                .HashPassword(user, request.Password);
-
-            return Ok(user);
+            _authService = authService;
         }
 
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register(RegisterUserRequest request)
+        {
+            var result = await _authService.RegisterAsync(AuthWebApiMapper.MapToRegisterUserDto(request));
+            if (result.HasErrors())
+            {
+                var error = result.Errors!.First();
+                return StatusCode((int)error.Code, error);
+            }
+
+            return Ok(AuthWebApiMapper.MapToRegisterUserResponse(result.Result!));
+        }
     }
 }
