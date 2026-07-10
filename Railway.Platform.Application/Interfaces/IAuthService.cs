@@ -8,5 +8,6 @@ namespace Railway.Platform.Application.Interfaces
     public interface IAuthService
     {
         Task<OperationResult<User?>> RegisterAsync(RegisterUserDto request);
+        Task<OperationResult<User?>> LoginAsync(LoginUserDto request);
     }
 }

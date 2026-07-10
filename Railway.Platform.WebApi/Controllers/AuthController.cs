@@ -29,5 +29,18 @@ namespace Railway.Platform.WebApi.Controllers
 
             return Ok(AuthWebApiMapper.MapToRegisterUserResponse(result.Result!));
         }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> Login(LoginUserRequest request)
+        {
+            var result = await _authService.LoginAsync(AuthWebApiMapper.MapToLoginUserDto(request));
+            if (result.HasErrors())
+            {
+                var error = result.Errors!.First();
+                return StatusCode((int)error.Code, error);
+            }
+
+            return Ok(AuthWebApiMapper.MapToLoginUserResponse(result.Result!));
+        }
     }
 }

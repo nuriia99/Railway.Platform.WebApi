@@ -17,13 +17,13 @@ namespace Railway.Platform.Infrastructure.Repositories
             _config = config;
         }
 
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
         public async Task<OperationResult<User?>> RegisterAsync(User request)
         {
-            if(await _context.Users.AnyAsync(u => u.Username == request.Username))
-            {
-                return new OperationResult<User?>().AddError(Errors.InvalidUser);
-            }
-
             _context.Users.Add(request);
             await _context.SaveChangesAsync();
 

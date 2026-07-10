@@ -9,5 +9,9 @@ namespace Railway.Platform.WebApi.Mappers
         => new(request.UserName, request.Password);
         public static RegisterUserResponse MapToRegisterUserResponse(User user)
         => new(user.Id, user.Username);
+        public static LoginUserDto MapToLoginUserDto(LoginUserRequest request)
+        => new(request.UserName, request.Password);
+        public static LoginUserResponse MapToLoginUserResponse(User user)
+        => new(user.Id, user.Username);
     }
 }
